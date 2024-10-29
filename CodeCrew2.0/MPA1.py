@@ -13,7 +13,6 @@ model = genai.GenerativeModel('gemini-pro')
 
 # Initialize speech recognition
 recognizer = sr.Recognizer()
-is_listening = False
 
 # Initialize session state
 if 'chat_history' not in st.session_state:
@@ -153,6 +152,7 @@ def process_user_input(user_input):
     response = get_bot_response(user_input)
     update_memory(user_input, response)
     return response
+import streamlit as st
 
 def generate_recipe_recommendations():
     """Generate diet plan based on collected information"""
@@ -248,7 +248,7 @@ input_container = st.container()
 
 with input_container:
     # Create columns for input field and buttons
-    col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+    col1, col2, col3 = st.columns([3, 1, 1])
     
     with col1:
         # Text input with Enter key handling
@@ -265,7 +265,6 @@ with input_container:
     
     with col3:
         if st.button("🎤 Speak"):
-            is_listening = True
             with sr.Microphone() as source:
                 st.write("Listening...")
                 try:
@@ -275,13 +274,6 @@ with input_container:
                     handle_input(user_input)
                 except Exception as e:
                     st.error("Could not understand you, could you repeat?")
-                finally:
-                    is_listening = False
-    
-    with col4:
-        if is_listening and st.button("Stop Listening"):
-            is_listening = False
-            st.write("Stopped listening.")
 
 # Display chat history in the container
 with chat_container:
@@ -302,4 +294,4 @@ if st.button("Clear Chat"):
     st.session_state.current_question_index = 0
     st.session_state.questioning_mode = False
     st.session_state.memory = {'name': None, 'preferences': {}, 'context': []}
-    st.rerun() 
+    st.rerun()

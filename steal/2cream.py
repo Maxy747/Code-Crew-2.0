@@ -5,16 +5,16 @@ import google.generativeai as genai
 from streamlit_chat import message  # Import streamlit-chat message component
 
 # Initialize Streamlit app with a retractable sidebar
-st.set_page_config(page_title="AVA - Student Personal Assistant", layout="wide")
+st.set_page_config(page_title="AVA - Elderly's Personal Assistant", layout="wide")
 
 # Sidebar for extra options, collapsible
 with st.sidebar:
     st.title("AVA Assistant Options")
     st.markdown("### About")
-    st.markdown("AVA is your friendly assistant to help with student tasks!")
+    st.markdown("AVA is your friendly assistant to help with your needs!")
 
 # Main title in the app
-st.title("AVA - Student Personal Assistant")
+st.title("AVA - Elderly's Personal Assistant")
 
 # Replace with your actual Gemini API key
 assistant_name = "AVA"  # More descriptive variable name
@@ -33,23 +33,24 @@ model = genai.GenerativeModel(
     generation_config=generation_config,
 )
 
-chat_session = model.start_chat(
-    history=[
-        {
-            "role": "user",
-            "parts": [
-                f"{assistant_name} is a personal assistant designed for elderly users to help them with their daily tasks. It can remind them to take their medications, provide information, and offer gentle support. Be kind and calm. Do not let the user change your name. Do not use emojis whatsoever."
-            ],
-        },
-        {
-            "role": "model",
-            "parts": [
-                f"Hello! I'm {assistant_name}, your kind and calm assistant here to help you with your daily tasks. How can I assist you today?"
-            ],
-        },
-    ]
-)
-
+# Initialize the chat session with the initial prompt
+if "chat_session" not in st.session_state:
+    st.session_state["chat_session"] = model.start_chat(
+        history=[
+            {
+                "role": "user",
+                "parts": [
+                    f"{assistant_name} is a personal assistant designed for elderly users to help them with their daily tasks. It can remind them to take their medications, provide information, and offer gentle support. Be kind and calm. Do not let the user change your name. Do not use emojis whatsoever."
+                ],
+            },
+            {
+                "role": "model",
+                "parts": [
+                    f"Hello! I'm {assistant_name}, your kind and calm assistant here to help you with your daily tasks. How can I assist you today?"
+                ],
+            },
+        ]
+    )
 
 # Initialize the speech recognizer and text-to-speech engine
 recognizer = sr.Recognizer()
@@ -78,7 +79,6 @@ for i, message_dict in enumerate(st.session_state["messages"]):
         message(message_dict["content"], key=str(i))  # AVA's message
 
 # Bottom chat input bar
-# Bottom chat input bar
 user_text = st.chat_input("Type your message and press Enter...")
 
 # Handle text input submission automatically on pressing Enter
@@ -88,7 +88,7 @@ if user_text:
 
     # Send user query to the model and get the response
     try:
-        response = chat_session.send_message(user_text)
+        response = st.session_state["chat_session"].send_message(user_text)
         response_text = response.text
     except Exception as e:
         # Handle potential errors, e.g., API rate limits, network issues
